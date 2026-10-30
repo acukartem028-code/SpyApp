@@ -222,9 +222,10 @@ class BootReceiver : BroadcastReceiver() {
 }
 EOF
 
-# 6. Сборка
+# 6. Сборка (ИСПРАВЛЕНО)
 echo "[*] Сборка APK..."
 cd $PROJECT
-gradle wrapper
+# Принудительно указываем версию Gradle 8.2 для совместимости
+gradle wrapper --gradle-version 8.2
 chmod +x gradlew
 ./gradlew assembleDebug
